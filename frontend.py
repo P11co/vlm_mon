@@ -31,4 +31,3 @@ else:
     if question:
         answer = answer_question(st.session_state.index, st.session_state.records, question)
         st.write(answer)
-

@@ -62,13 +62,12 @@ def summarize_screenshot(client: OpenAI, png_bytes: bytes) -> str:
         }],
     )
     return resp.output_text
-
+  
 
 def format_output(ts: str, meta_raw: str) -> str:
     ans = f"\n\U0001F5BC\uFE0F  {ts}\n"
     ans += meta_raw if meta_raw else "None"
-    return ans
-
+    
 
 def run_capture_session(stop_event: Optional[object] = None) -> List[Dict]:
     """Capture screenshots until duration expires or ``stop_event`` is set."""
@@ -79,23 +78,8 @@ def run_capture_session(stop_event: Optional[object] = None) -> List[Dict]:
     while (time.time() - start) < SESSION_DURATION_MIN * 60:
         if stop_event is not None and getattr(stop_event, "is_set", lambda: False)():
             break
-        img = grab_active_window()
-        png = mss.tools.to_png(img.rgb, img.size)
-        phash = hashlib.sha1(png).hexdigest()
-        if records and phash == records[-1]["phash"]:
-            time.sleep(CAPTURE_INTERVAL_S)
-            continue
-        meta_raw = summarize_screenshot(client, png)
-        stamp = dt.datetime.utcnow().isoformat(timespec="seconds") + "Z"
-        meta = format_output(stamp, meta_raw)
-        records.append({"timestamp": stamp, "phash": phash, "meta": meta})
-        print(meta)
-        save_active_window_to_png(img, TMP_DIR / f"{stamp}.png")
-        time.sleep(CAPTURE_INTERVAL_S)
-    print("Loop finished")
-    return records
 
-
+          
 def build_index(records: List[Dict]):
     """Create a FAISS index from record summaries."""
     if not records:
@@ -127,7 +111,3 @@ def answer_question(index, records: List[Dict], question: str, k: int = 3) -> st
     ]
     ans = openai.chat.completions.create(model="gpt-4o", messages=prompt, temperature=0.2)
     return ans.choices[0].message.content
-
-
-if __name__ == "__main__":
-    run_capture_session()
