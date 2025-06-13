@@ -25,3 +25,5 @@ Or start the Streamlit prototype:
 ```bash
 streamlit run frontend.py
 ```
+
+In the browser you can start a capture session and stop it with the *Stop Capture* button. After the session finishes you can ask questions about the captured summaries using the built‑in chatbot.
